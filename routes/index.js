@@ -1,12 +1,12 @@
 
 const router = require('express').Router()
-const { UserController, TaskController, DepartmentController } = require('../controllers')
+const { UserController, TaskController } = require('../controllers')
 const { Authentication, Authorization } = require('../middlewares')
 
 
 router.post('/register', UserController.register)
 router.post('/login', UserController.login)
-router.post('/google-login', UserController.googleLogin)
+// router.post('/google-login', UserController.googleLogin)
 // router.post('/', UserController.githubLogin)
 
 //Authentication Required
