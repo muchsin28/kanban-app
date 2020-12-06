@@ -10,13 +10,13 @@ router.post('/login', UserController.login)
 // router.post('/', UserController.githubLogin)
 
 //Authentication Required
-router.use(Authentication)
+// router.use(Authentication)
 router.post('/tasks', TaskController.create)
 router.get('/tasks', TaskController.getAll)
 router.get('/tasks/:id', TaskController.getById);
 
 //Authorization Required
-router.use('/tasks/:id', Authorization);
+// router.use('/tasks/:id', Authorization);
 router.patch('/tasks/:id', TaskController.update)
 // router.put('/tasks/:id', TaskController.edit)
 router.delete('/tasks/:id', TaskController.delete)
