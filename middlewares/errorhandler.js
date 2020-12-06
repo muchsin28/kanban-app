@@ -18,7 +18,7 @@ function ErrorHandler(err, req, res, next) {
     });
     res.status(400).json({messages})
   }else {
-    res.status(500).json("Internal Server Error")
+    res.status(500).json(err)
   }
 
 }
