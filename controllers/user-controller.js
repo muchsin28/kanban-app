@@ -1,6 +1,6 @@
 const { User, Department } = require("../models");
 const { OAuth2Client } = require('google-auth-library');
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID); //1059530370578-842en1m3n0nbq1nomkshggd11ct5oar7.apps.googleusercontent.com
 const { checkPassword, generateToken } = require("../helpers");
 
 class UserController {
@@ -19,9 +19,10 @@ class UserController {
         DepartmentId,
       };
       let user = await User.create(newUser);
+      console.log(user)
       res.status(201).json({ id: user.id, email: user.email });
     } catch (err) {
-      next(err)
+      console.log(err)
     }
   }
 
@@ -70,9 +71,7 @@ class UserController {
     try {
       const ticket = await client.verifyIdToken({
         idToken: req.body.google_token,
-        audience: process.env.GOOGLE_CLIENT_ID,  // Specify the CLIENT_ID of the app that accesses the backend
-        // Or, if multiple clients access the backend:
-        //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
+        audience: process.env.GOOGLE_CLIENT_ID,  // 1059530370578-842en1m3n0nbq1nomkshggd11ct5oar7.apps.googleusercontent.com
       });
 
       const payload = ticket.getPayload()
@@ -95,8 +94,8 @@ class UserController {
         const createuser = await User.create({
           name: payload.name,
           email: payload.email,
-          password: process.env.GOOGLE_PASSWORD,
-          DepartmentId: process.env.DEPARTMENT_ID
+          password: process.env.GOOGLE_PASSWORD,  //"ApaAjaLah"
+          DepartmentId: process.env.DEPARTMENT_ID // 5
         })
         const access_token = generateToken({ id: createuser.id, name: createuser.name, email: createuser.email, DepartmentId: createuser.DepartmentId })
         res.status(200).json({ access_token, id: createuser.id, name: createuser.name, email: createuser.email, DepartmentId: createuser.DepartmentId })

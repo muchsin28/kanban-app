@@ -1,7 +1,6 @@
 {
   "name": "muchsin-kanban",
   "version": "1.0.0",
-  "description": "",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
@@ -25,5 +24,6 @@
   "devDependencies": {
     "eslint-config-prettier": "^6.15.0",
     "eslint-plugin-prettier": "^3.1.4"
-  }
+  },
+  "description": ""
 }
