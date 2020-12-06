@@ -5,7 +5,7 @@ const Authorization = async (req, res, next) => {
     const task = await Task.findOne({
       where: { id: +req.params.id }
     })
-    if( task){
+    if(!task){
       throw {
         status: 404,
         message: 'Item not found'

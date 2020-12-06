@@ -1,10 +1,10 @@
 const { User, Department } = require("../models");
-// const { OAuth2Client } = require('google-auth-library');
-// const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const { OAuth2Client } = require('google-auth-library');
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const { checkPassword, generateToken } = require("../helpers");
 
 class UserController {
-  static async register(req, res) {
+  static async register(req, res, next) {
     try {
       let DepartmentId;
       let depts = await Department.findAll();
@@ -21,76 +21,89 @@ class UserController {
       let user = await User.create(newUser);
       res.status(201).json({ id: user.id, email: user.email });
     } catch (err) {
-      let msg = err.errors[0].message;
-      res.status(500).json(msg);
+      next(err)
     }
   }
 
-  static async login(req, res) {
+  static async login(req, res, next) {
+    let input = {
+      email: req.body.email,
+      password: req.body.password,
+    };
     try {
-      let input = {
-        email: req.body.email,
-        password: req.body.password,
-      };
       let user = await User.findOne({
-        where: { email: input.email },
+        where: {
+          email: input.email
+        },
         include: Department,
       });
-      console.log(user.DepartmentId);
       if (!user) {
-        res.status(404).json("User not found");
+        throw {
+          status: 400,
+          message: "User not found"
+        }
       } else if (checkPassword(input.password, user.password)) {
         const access_token = generateToken({
           id: user.id,
           email: user.email,
           name: user.name,
-          DepartmentId: user.DepartmentId,
+          DepartmentId: user.Department.id,
+          Department: user.Department.name,
         });
-        res.status(200).json({ access_token, name: user.name });
+        res.status(200).json({
+          access_token,
+          name: user.name,
+          Department: user.Department.name,
+        });
       } else {
-        res.status(400).json("Invalid Email/Password");
+        throw {
+          status: 400,
+          message: "Invalid Email/Password"
+        }
       }
     } catch (err) {
-      res.status(500).json(err);
+      next(err);
     }
   }
 
-  // static async googleLogin(req, res) {
-  //   try {
-  //     const ticket = await client.verifyIdToken({
-  //       idToken: req.body.google_token,
-  //       audience: process.env.GOOGLE_CLIENT_ID,  // Specify the CLIENT_ID of the app that accesses the backend
-  //       // Or, if multiple clients access the backend:
-  //       //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
-  //     });
+  static async googleLogin(req, res, next) {
+    try {
+      const ticket = await client.verifyIdToken({
+        idToken: req.body.google_token,
+        audience: process.env.GOOGLE_CLIENT_ID,  // Specify the CLIENT_ID of the app that accesses the backend
+        // Or, if multiple clients access the backend:
+        //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
+      });
 
-  //     const payload = ticket.getPayload()
-  //     console.log(payload);
-  //     const userlogin = await User.findOne({
-  //       where: {
-  //         email: payload.email
-  //       }
-  //     })
-  //     console.log(payload);
-  //     if (userlogin) {
-  //       const access_token = generateToken({
-  //         id: userlogin.id,
-  //         email: userlogin.email,
-  //         name: userlogin.name
-  //       })
-  //       res.status(200).json({ access_token, email: userlogin.email, name: userlogin.name })
-  //     } else {
-  //       const createuser = await User.create({
-  //         name: payload.name,
-  //         email: payload.email,
-  //         password: process.env.GOOGLE_PASSWORD
-  //       })
-  //       const access_token = generateToken({ id: createuser.id, email: createuser.email })
-  //       res.status(200).json({ access_token })
-  //     }
-  //   } catch (error) {
-  //     res.status(500).json(error)
-  //   }
-  // }
+      const payload = ticket.getPayload()
+      console.log(payload);
+      const userlogin = await User.findOne({
+        where: {
+          email: payload.email
+        }
+      })
+      console.log(payload);
+      if (userlogin) {
+        const access_token = generateToken({
+          id: userlogin.id,
+          email: userlogin.email,
+          name: userlogin.name,
+          DepartmentId: userlogin.DepartmentId
+        })
+        res.status(200).json({ access_token, id: userlogin.id, email: userlogin.email, name: userlogin.name, DepartmentId: userlogin.DepartmentId })
+      } else {
+        const createuser = await User.create({
+          name: payload.name,
+          email: payload.email,
+          password: process.env.GOOGLE_PASSWORD,
+          DepartmentId: process.env.DEPARTMENT_ID
+        })
+        const access_token = generateToken({ id: createuser.id, name: createuser.name, email: createuser.email, DepartmentId: createuser.DepartmentId })
+        res.status(200).json({ access_token, id: createuser.id, name: createuser.name, email: createuser.email, DepartmentId: createuser.DepartmentId })
+      }
+    } catch (error) {
+      next(err)
+    }
+  }
 }
 module.exports = UserController;

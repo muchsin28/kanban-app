@@ -20,8 +20,14 @@ module.exports = (sequelize, DataTypes) => {
       type:DataTypes.STRING,
       allowNull:false,
       validate:{
-        notEmpty:{msg:"Name cannot be Empty"}
-      }
+        notEmpty:{
+          msg:"Name cannot be Empty"
+        },
+        len: {
+          args: [2],
+          msg: "Title length Min 2 chars"
+        }
+      },
     },
     description: DataTypes.STRING,
     deadline: {
