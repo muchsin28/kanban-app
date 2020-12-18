@@ -7,7 +7,7 @@ const { Authentication, Authorization } = require('../middlewares')
 router.post('/register', UserController.register)
 router.post('/login', UserController.login)
 router.post('/google-login', UserController.googleLogin)
-// router.post('/', UserController.githubLogin)
+// router.post('/', UserController.githubLogin)c
 
 //Authentication Required
 router.use(Authentication)

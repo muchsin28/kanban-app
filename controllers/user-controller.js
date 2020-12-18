@@ -22,7 +22,7 @@ class UserController {
       console.log(user)
       res.status(201).json({ id: user.id, email: user.email });
     } catch (err) {
-      console.log(err)
+      next(err)
     }
   }
 
